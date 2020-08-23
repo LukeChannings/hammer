@@ -6,7 +6,7 @@ Hammer uses [esbuild](https://github.com/evanw/esbuild) to transparently transfo
 
 ```
 Usage:
-  hammer bundle <src> <dest>
+  hammer bundle <src> <dest> [--minify] [--extract-css]
   hammer serve <src> [--port=<port>] [--host=<host>]
   hammer -h | --help
   hammer --version
