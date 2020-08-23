@@ -15,6 +15,9 @@ import (
 	"github.com/lukechannings/hammer/internal/esbuild"
 )
 
+var taggedVersion string
+var gitHash string
+
 func main() {
 	usage := `Hammer.
 
@@ -38,7 +41,11 @@ Options:
 	}
 
 	if showVersion, _ := arguments.Bool("--version"); showVersion {
-		fmt.Println("v1.0.0")
+		if taggedVersion != "" {
+			fmt.Println(taggedVersion)
+		} else {
+			fmt.Println(gitHash)
+		}
 		os.Exit(0)
 	}
 
@@ -89,12 +96,12 @@ func serve(src string, addr string) {
 
 				if len(result.Errors) != 0 {
 					for _, err := range result.Errors {
-						fmt.Printf("ERROR: %s\n", err.Text)
+						fmt.Printf("Error: %s\n", err.Text)
 					}
 				}
 				if len(result.Warnings) != 0 {
 					for _, warn := range result.Warnings {
-						fmt.Printf("WARNING: %s\n", warn.Text)
+						fmt.Printf("Warning: %s\n", warn.Text)
 					}
 				}
 
