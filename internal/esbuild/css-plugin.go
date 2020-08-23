@@ -1,0 +1,47 @@
+package esbuild
+
+import (
+	"fmt"
+	"io/ioutil"
+	"log"
+	"path/filepath"
+
+	"github.com/evanw/esbuild/pkg/api"
+)
+
+var extracted string
+
+// CSSPlugin - handles CSS imports
+func CSSPlugin(extract bool) func(api.Plugin) {
+	return func(plugin api.Plugin) {
+		plugin.SetName("css-plugin")
+
+		plugin.AddResolver(api.ResolverOptions{Filter: ".css$"},
+			func(args api.ResolverArgs) (api.ResolverResult, error) {
+				return api.ResolverResult{Path: filepath.Join(args.ImportDir, args.Path), Namespace: "css", External: false}, nil
+			})
+
+		plugin.AddLoader(api.LoaderOptions{Filter: ".css$", Namespace: "css"},
+			func(args api.LoaderArgs) (api.LoaderResult, error) {
+				data, err := ioutil.ReadFile(args.Path)
+
+				if err != nil {
+					log.Fatalf("\nCould not load %s. Error: %s\n", args.Path, err.Error())
+				}
+				var content string
+
+				if extract {
+					extracted += string(data)
+				} else {
+					content = fmt.Sprintf("const s = document.createElement('style'); s.innerHTML = \n`%s`; document.head.appendChild(s)", string(data))
+				}
+
+				return api.LoaderResult{Contents: &content, Loader: api.LoaderNone}, nil
+			})
+	}
+}
+
+// GetExtractedCSS - returns extracted stylesheet
+func GetExtractedCSS() string {
+	return extracted
+}
