@@ -1,0 +1,51 @@
+on:
+  push:
+    tags:
+      - 'v*'
+
+name: Upload Release Asset
+
+jobs:
+  build:
+    name: Upload Release Asset
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.14
+        id: go
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Build project
+        run: make build
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+      - name: Upload hammer-linux-amd64
+        id: upload-release-asset-amd64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build/linux-amd64/hammer
+          asset_name: hammer-linux-amd64
+          asset_content_type: application/octet-stream
+      - name: Upload hammer-linux-i386
+        id: upload-release-asset-i386
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build/linux-i386/hammer
+          asset_name: hammer-linux-i386
+          asset_content_type: application/octet-stream
