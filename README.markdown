@@ -19,3 +19,7 @@ Options:
   -g --gzip            Compress the output with gzip. Note: Not recommended for local development.
   -P --proxy=<url>     Redirect 404s to a proxy URL
 ```
+
+## Installation
+
+Have a look at [Releases](https://github.com/LukeChannings/hammer/releases/) and download the binary for your architecture and platform
