@@ -36,7 +36,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/linux-amd64/hammer
+          asset_path: ./build/linux/hammer
           asset_name: hammer-linux-amd64
           asset_content_type: application/octet-stream
       - name: Upload hammer-linux-i386
@@ -46,7 +46,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/linux-i386/hammer
+          asset_path: ./build/linux-386/hammer
           asset_name: hammer-linux-i386
           asset_content_type: application/octet-stream
       - name: Upload hammer-darwin
@@ -57,5 +57,15 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./build/darwin/hammer
-          asset_name: hammer-linux-i386
+          asset_name: hammer-macos
+          asset_content_type: application/octet-stream
+      - name: Upload hammer-windows
+        id: upload-release-asset-windows
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build/windows/hammer
+          asset_name: hammer-windows
           asset_content_type: application/octet-stream
