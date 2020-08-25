@@ -49,3 +49,13 @@ jobs:
           asset_path: ./build/linux-i386/hammer
           asset_name: hammer-linux-i386
           asset_content_type: application/octet-stream
+      - name: Upload hammer-darwin
+        id: upload-release-asset-darwin
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build/darwin/hammer
+          asset_name: hammer-linux-i386
+          asset_content_type: application/octet-stream
