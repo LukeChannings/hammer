@@ -1,19 +1,21 @@
 # Hammer
 
-Hammer uses [esbuild](https://github.com/evanw/esbuild) to transparently transform TypeScript. Use ECMAScript modules with [Pika](https://www.pika.dev) or [Unpkg](https://unpkg.com) and drop NPM or Yarn from your toolchain.
+An HTTP server that transparently transforms TypeScript and JavaScript using [esbuild](https://github.com/evanw/esbuild). Because Go is native, this only adds a few milliseconds to the HTTP request. It mirrors the general switches from [http-server](https://github.com/http-party/http-server), and supports multiple sources.
 
 ## Usage
 
 ```
 Usage:
-  hammer bundle <src> <dest> [--minify] [--extract-css]
-  hammer serve <src> [--port=<port>] [--host=<host>]
+  hammer <src>... [-p=<port>] [-a=<host>] [--gzip] [--proxy=<url>]
+  hammer bundle <entrypoint> <dest> [--minify] [--extract-css]
   hammer -h | --help
   hammer --version
 
 Options:
   -h --help            Show this screen.
   --version            Show version.
-  --port=<port>        The HTTP Server port [default: 4321]
-  --host=<host>        The default IP for the server port [default: 0.0.0.0]
+  -p --port=<port>     The HTTP Server port [default: 4321]
+  -a --addr=<host>     The default IP for the server port [default: 0.0.0.0]
+  -g --gzip            Compress the output with gzip. Note: Not recommended for local development.
+  -P --proxy=<url>     Redirect 404s to a proxy URL
 ```

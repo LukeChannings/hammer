@@ -33,7 +33,7 @@ func CSSPlugin(extract bool) func(api.Plugin) {
 				if extract {
 					extracted += string(data)
 				} else {
-					content = fmt.Sprintf("const s = document.createElement('style'); s.innerHTML = \n`%s`; document.head.appendChild(s)", string(data))
+					content = WrapCSSForJSInjection(string(data), args.Path)
 				}
 
 				return api.LoaderResult{Contents: &content, Loader: api.LoaderNone}, nil
@@ -44,4 +44,13 @@ func CSSPlugin(extract bool) func(api.Plugin) {
 // GetExtractedCSS - returns extracted stylesheet
 func GetExtractedCSS() string {
 	return extracted
+}
+
+// WrapCSSForJSInjection - wraps a CSS string in JavaScript that injects it into the DOM
+func WrapCSSForJSInjection(css string, path string) string {
+	return fmt.Sprintf(`
+const style = document.createElement('style')
+style.setAttribute('data-path', "%v")
+style.innerHTML = `+"`%v`"+`
+document.head.appenChild(style)`, path, css)
 }
