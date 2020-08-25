@@ -64,7 +64,7 @@ Options:
 			compress = serve.CompressGzip
 		}
 
-		serve.Serve(srcs, fmt.Sprintf("%s:%s", addr, port), compress, &proxy)
+		serve.Serve(srcs, fmt.Sprintf("%s:%s", addr, port), compress, proxy)
 		os.Exit(0)
 	}
 }

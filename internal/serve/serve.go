@@ -49,7 +49,7 @@ const (
 )
 
 // Serve - starts an HTTP server to serve static sources and transform TS and JS files on-the-fly.
-func Serve(srcs []string, addr string, compress Compress, proxy *string) {
+func Serve(srcs []string, addr string, compress Compress, proxy string) {
 
 	var handler http.HandlerFunc = func(w http.ResponseWriter, r *http.Request) {
 		p := r.URL.Path
@@ -90,9 +90,8 @@ func Serve(srcs []string, addr string, compress Compress, proxy *string) {
 		}
 
 		if len(content) == 0 {
-			if proxy != nil {
-				location := *proxy + r.URL.Path
-				fmt.Printf("Redirecting %v to %v\n", r.URL.Path, location)
+			if len(proxy) != 0 {
+				location := proxy + r.URL.Path
 				w.Header().Set("Location", location)
 				w.WriteHeader(http.StatusTemporaryRedirect)
 				return

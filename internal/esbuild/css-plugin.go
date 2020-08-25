@@ -52,5 +52,5 @@ func WrapCSSForJSInjection(css string, path string) string {
 const style = document.createElement('style')
 style.setAttribute('data-path', "%v")
 style.innerHTML = `+"`%v`"+`
-document.head.appenChild(style)`, path, css)
+document.head.appendChild(style)`, path, css)
 }
