@@ -35,3 +35,7 @@ The example folder shows an extremely simple React project that imports React an
 3. If a CSS file is requested and the referer (the resource that triggered the request) is one of the extensions listed above, Hammer wraps the CSS in some JavaScript injection code and returns it as `text/javascript`
 
 The experience the developer gets from this is that the code is loading natively. The transformations are minimal, the browser is still using ECMAScript Modules, but you can use some newer JS syntax, TypeScript, and import CSS.
+
+## But why tho?
+
+If you want a native development tool that allows you quickly build out a TypeScript + React project with no Webpack or Babel or even Node & NPM installed, this tool might be for you.
