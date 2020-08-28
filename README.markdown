@@ -17,7 +17,7 @@ Options:
   -a --addr=<host>                       The default IP for the server port [default: 0.0.0.0]
   -g --gzip                              Compress the output with gzip. Note: Not recommended for local development.
   -P --proxy=<url>                       Redirect 404s to a proxy URL
-  --sourcemap=<external|inline|none>   Whether or not to include a source map with the bundle
+  --sourcemap=<external|inline|none>     Whether or not to include a source map with the bundle
 ```
 
 ## Installation
