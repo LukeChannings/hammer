@@ -164,7 +164,7 @@ func Serve(srcs []string, addr string, compress Compress, proxy string) {
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	fmt.Printf("Listening on %s\n", addr)
+	fmt.Println("Listening on ", addr)
 
 	if err := s.ListenAndServe(); err != nil {
 		log.Fatalf("An error occurred trying to listen on %v - %v", addr, err.Error())

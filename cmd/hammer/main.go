@@ -20,7 +20,7 @@ func main() {
 
 Usage:
   hammer serve <src>... [-p=<port>] [-a=<host>] [--gzip] [--proxy=<url>]
-  hammer bundle <entrypoint> <dest> [--minify] [--sourcemap=<external|internal|none>] [--extract-css]
+  hammer bundle <entrypoint> <dest> [--minify] [--sourcemap=<external|inline|none>] [--extract-css]
   hammer -h | --help
   hammer --version
 

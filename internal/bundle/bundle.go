@@ -14,7 +14,7 @@ import (
 
 // Bundle - combines all dependencies of entrypoint into a single file
 func Bundle(entrypoint string, dest string, minify bool, sourcemap api.SourceMap, extractCSS bool) {
-	fmt.Printf("Bundling %s", entrypoint)
+	fmt.Println("Bundling", entrypoint)
 	result := api.Build(api.BuildOptions{
 		EntryPoints:       []string{entrypoint},
 		Bundle:            true,
