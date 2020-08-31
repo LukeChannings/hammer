@@ -45,6 +45,6 @@ func Bundle(entrypoint string, dest string, minify bool, sourcemap api.SourceMap
 	if extractCSS {
 		css := esbuild.GetExtractedCSS()
 		cssPath := strings.Replace(dest, path.Ext(dest), ".css", 1)
-		ioutil.WriteFile(cssPath, []byte(css), 0x740)
+		ioutil.WriteFile(cssPath, []byte(css), 0740)
 	}
 }
