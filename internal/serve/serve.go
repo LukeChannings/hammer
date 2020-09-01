@@ -135,7 +135,7 @@ func Serve(srcs []string, addr string, compress Compress, proxy string) {
 			} else if strings.HasSuffix(p, ".css") {
 				if hasExtension(ref, extensions...) || path.Ext(ref) == "" {
 					w.Header().Set("content-type", "application/javascript")
-					fmt.Fprintf(w, esbuild.WrapCSSForJSInjection(string(content), p))
+					fmt.Fprint(w, esbuild.WrapCSSForJSInjection(string(content), p))
 				} else {
 					w.Header().Set("content-type", "text/css")
 					if zw != nil {
