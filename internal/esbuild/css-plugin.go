@@ -50,7 +50,7 @@ func GetExtractedCSS() string {
 func WrapCSSForJSInjection(css string, path string) string {
 	return fmt.Sprintf(`
 const style = document.createElement('style')
-style.setAttribute('data-path', "%v")
-style.innerHTML = `+"`%v`"+`
+style.setAttribute('data-path', "%s")
+style.innerHTML = `+"`%s`"+`
 document.head.appendChild(style)`, path, css)
 }
