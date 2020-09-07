@@ -1,6 +1,7 @@
 # 🔨 Hammer
 
 Develop web apps with React, TypeScript, CSS Modules, without configuring any tooling or compromising speed of development.
+Hammer is written in Go, doesn't require Node.js or NPM, and compiles on-the-fly at native speed.
 
 ## Usage
 
