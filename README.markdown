@@ -1,13 +1,6 @@
 # 🔨 Hammer
 
-**Features**
-
-- Zero config HTTP server
-- TypeScript support
-- CSS Module support
-- Bundling support
-
-An HTTP server that transparently transforms TypeScript and JavaScript using [esbuild](https://github.com/evanw/esbuild). Because Go is native, this only adds a few milliseconds to the HTTP request. It mirrors the general switches from [http-server](https://github.com/http-party/http-server), and supports multiple sources.
+Develop web apps with React, TypeScript, CSS Modules, without configuring any tooling or compromising speed of development.
 
 ## Usage
 
