@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/lukechannings/hammer/internal/cssmodule"
+
 	"github.com/evanw/esbuild/pkg/api"
 	"github.com/lukechannings/hammer/internal/esbuild"
 )
@@ -49,7 +51,7 @@ const (
 )
 
 // Serve - starts an HTTP server to serve static sources and transform TS and JS files on-the-fly.
-func Serve(srcs []string, addr string, compress Compress, proxy string) {
+func Serve(srcs []string, addr string, compress Compress, proxy string, cssModules bool) {
 
 	var handler http.HandlerFunc = func(w http.ResponseWriter, r *http.Request) {
 		p := r.URL.Path
@@ -59,20 +61,21 @@ func Serve(srcs []string, addr string, compress Compress, proxy string) {
 			p = "/index.html"
 		}
 
+		var fullPath string
 		var content []byte
 
 		for _, src := range srcs {
-			fullpath := path.Join(src, p)
-			data, err := ioutil.ReadFile(fullpath)
+			fullPath = path.Join(src, p)
+			data, err := ioutil.ReadFile(fullPath)
 
 			if err == nil {
 				content = data
 				break
-			} else if path.Ext(fullpath) == "" {
+			} else if path.Ext(fullPath) == "" {
 				fmt.Printf("Couldn't find %v. Trying extensions\n", p)
 				for _, ext := range extensions {
-					data, err := ioutil.ReadFile(fullpath + ext)
-					fmt.Printf("Looking for %v\n", fullpath+ext)
+					data, err := ioutil.ReadFile(fullPath + ext)
+					fmt.Printf("Looking for %v\n", fullPath+ext)
 					if err == nil {
 						content = data
 						p += ext
@@ -135,7 +138,15 @@ func Serve(srcs []string, addr string, compress Compress, proxy string) {
 			} else if strings.HasSuffix(p, ".css") {
 				if hasExtension(ref, extensions...) || path.Ext(ref) == "" {
 					w.Header().Set("content-type", "application/javascript")
-					fmt.Fprint(w, esbuild.WrapCSSForJSInjection(string(content), p))
+					if cssModules {
+						module, err := cssmodule.Process(strings.NewReader(string(content)), fullPath)
+						if err != nil {
+							w.Write([]byte(fmt.Sprintf("500 - %s", err.Error())))
+						}
+						fmt.Fprint(w, esbuild.WrapCSSForJSInjection(module.CSS, p, module.GetExportsString()))
+					} else {
+						fmt.Fprint(w, esbuild.WrapCSSForJSInjection(string(content), p, ""))
+					}
 				} else {
 					w.Header().Set("content-type", "text/css")
 					if zw != nil {

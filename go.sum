@@ -4,8 +4,14 @@ github.com/evanw/esbuild v0.6.26-0.20200817041948-22f622ea2c2d h1:hIgdGaatojhuwe
 github.com/evanw/esbuild v0.6.26-0.20200817041948-22f622ea2c2d/go.mod h1:mptxmSXIzBIKKCe4jo9A5SToEd1G+AKZ9JmY85dYRJ0=
 github.com/evanw/esbuild v0.6.27 h1:vkOEyjuC3g3Te3NOkkkwwgD/AHlu9ArERYth7K8dY98=
 github.com/evanw/esbuild v0.6.28 h1:sTJdvTB8WCSp9N5a+T18Fw3a5So76qHQJHwYNhy0Z/c=
+github.com/evanw/esbuild v0.6.32 h1:hVuqC+IgEENPWnr0gic01EFgGCmyW8dUPnr78zC7K5k=
 github.com/gorilla/mux v1.8.0 h1:i40aqfkR1h2SlN9hojwV5ZA91wcXFOvkdNIeFDP5koI=
 github.com/gorilla/mux v1.8.0/go.mod h1:DVbg23sWSpFRCP0SfiEN6jmj59UnW/n46BH5rLB71So=
+github.com/iancoleman/strcase v0.1.1 h1:2I+LRClyCYB7JgZb9U0k75VHUiQe9RfknRqDyUfzp7k=
+github.com/iancoleman/strcase v0.1.1/go.mod h1:SK73tn/9oHe+/Y0h39VT4UCxmurVJkR5NA7kMEAOgSE=
 github.com/kylelemons/godebug v1.1.0/go.mod h1:9/0rRGxNHcop5bhtWyNeEfOS8JIWk580+fNqagV/RAw=
+github.com/tdewolff/parse v1.1.0 h1:tMjj9GCK8zzwjWyxdZ4pabzdWO1VG+G3bvCnG6aUIyQ=
+github.com/tdewolff/parse v2.3.4+incompatible h1:x05/cnGwIMf4ceLuDMBOdQ1qGniMoxpP46ghf0Qzh38=
+github.com/tdewolff/parse v2.3.4+incompatible/go.mod h1:8oBwCsVmUkgHO8M5iCzSIDtpzXOT0WXX9cWhz+bIzJQ=
 golang.org/x/sys v0.0.0-20200501145240-bc7a7d42d5c3 h1:5B6i6EAiSYyejWfvc5Rc9BbI3rzIsrrXfAQBWnYfn+w=
 golang.org/x/sys v0.0.0-20200501145240-bc7a7d42d5c3/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=

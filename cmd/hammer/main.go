@@ -19,8 +19,8 @@ func main() {
 	usage := `hammer.
 
 Usage:
-  hammer serve <src>... [-p=<port>] [-a=<host>] [--gzip] [--proxy=<url>]
-  hammer bundle <entrypoint> <dest> [--minify] [--sourcemap=<external|inline|none>] [--extract-css]
+  hammer serve <src>... [-p=<port>] [-a=<host>] [--gzip] [--proxy=<url>] [--css-modules]
+  hammer bundle <entrypoint> <dest> [--minify] [--sourcemap=<external|inline|none>] [--extract-css] [--css-modules]
   hammer -h | --help
   hammer --version
 
@@ -31,7 +31,8 @@ Options:
   -a --addr=<host>                       The default IP for the server port [default: 0.0.0.0]
   -g --gzip                              Compress the output with gzip. Note: Not recommended for local development.
   -P --proxy=<url>                       Redirect 404s to a proxy URL
-  --sourcemap=<external|inline|none>   Whether or not to include a source map with the bundle
+	--sourcemap=<external|inline|none>     Whether or not to include a source map with the bundle
+	--css-modules                          Enable CSS Modules
 `
 
 	var version string = gitHash
@@ -44,6 +45,8 @@ Options:
 	if docoptErr != nil {
 		log.Fatal(docoptErr.Error())
 	}
+
+	cssModules, _ := args.Bool("--css-modules")
 
 	if shouldBundle, _ := args.Bool("bundle"); shouldBundle {
 		entrypoint, _ := args.String("<entrypoint>")
@@ -59,7 +62,7 @@ Options:
 		} else {
 			sourcemap = api.SourceMapNone
 		}
-		bundle.Bundle(entrypoint, dest, minify, sourcemap, extractCSS)
+		bundle.Bundle(entrypoint, dest, minify, sourcemap, extractCSS, cssModules)
 		os.Exit(0)
 	} else if shouldServe, _ := args.Bool("serve"); shouldServe {
 		srcs, _ := args["<src>"].([]string)
@@ -74,7 +77,7 @@ Options:
 			compress = serve.CompressGzip
 		}
 
-		serve.Serve(srcs, fmt.Sprintf("%s:%s", addr, port), compress, proxy)
+		serve.Serve(srcs, fmt.Sprintf("%s:%s", addr, port), compress, proxy, cssModules)
 		os.Exit(0)
 	} else {
 		fmt.Print(usage)

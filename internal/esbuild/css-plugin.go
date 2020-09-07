@@ -5,14 +5,16 @@ import (
 	"io/ioutil"
 	"log"
 	"path/filepath"
+	"strings"
 
 	"github.com/evanw/esbuild/pkg/api"
+	"github.com/lukechannings/hammer/internal/cssmodule"
 )
 
 var extracted string
 
 // CSSPlugin - handles CSS imports
-func CSSPlugin(extract bool) func(api.Plugin) {
+func CSSPlugin(extract bool, modules bool) func(api.Plugin) {
 	return func(plugin api.Plugin) {
 		plugin.SetName("css-plugin")
 
@@ -30,10 +32,26 @@ func CSSPlugin(extract bool) func(api.Plugin) {
 				}
 				var content string
 
-				if extract {
-					extracted += string(data)
+				if modules {
+					module, err := cssmodule.Process(strings.NewReader(string(data)), args.Path)
+
+					if err != nil {
+						return api.LoaderResult{}, err
+					}
+
+					content = module.GetExportsString()
+
+					if extract {
+						extracted += module.CSS
+					} else {
+						content = WrapCSSForJSInjection(module.CSS, args.Path, content)
+					}
 				} else {
-					content = WrapCSSForJSInjection(string(data), args.Path)
+					if extract {
+						extracted += string(data)
+					} else {
+						content = WrapCSSForJSInjection(string(data), args.Path, "")
+					}
 				}
 
 				return api.LoaderResult{Contents: &content, Loader: api.LoaderNone}, nil
@@ -47,10 +65,11 @@ func GetExtractedCSS() string {
 }
 
 // WrapCSSForJSInjection - wraps a CSS string in JavaScript that injects it into the DOM
-func WrapCSSForJSInjection(css string, path string) string {
+func WrapCSSForJSInjection(css string, path string, exports string) string {
 	return fmt.Sprintf(`
 const style = document.createElement('style')
 style.setAttribute('data-path', "%s")
 style.innerHTML = `+"`%s`"+`
-document.head.appendChild(style)`, path, css)
+document.head.appendChild(style)
+%s`, path, css, exports)
 }

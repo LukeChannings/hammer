@@ -1,3 +1,7 @@
+:root {
+	--test: red;
+}
+
 .Test {
-	color: red;
+	color: var(--test);
 }

@@ -13,7 +13,7 @@ import (
 )
 
 // Bundle - combines all dependencies of entrypoint into a single file
-func Bundle(entrypoint string, dest string, minify bool, sourcemap api.SourceMap, extractCSS bool) {
+func Bundle(entrypoint string, dest string, minify bool, sourcemap api.SourceMap, extractCSS bool, cssModules bool) {
 	fmt.Println("Bundling", entrypoint)
 	result := api.Build(api.BuildOptions{
 		EntryPoints:       []string{entrypoint},
@@ -26,7 +26,7 @@ func Bundle(entrypoint string, dest string, minify bool, sourcemap api.SourceMap
 		MinifySyntax:      minify,
 		MinifyWhitespace:  minify,
 		Sourcemap:         sourcemap,
-		Plugins:           []func(api.Plugin){esbuild.HTTPPlugin(true), esbuild.CSSPlugin(extractCSS)},
+		Plugins:           []func(api.Plugin){esbuild.HTTPPlugin(true), esbuild.CSSPlugin(extractCSS, cssModules)},
 	})
 
 	if len(result.Warnings) != 0 {
