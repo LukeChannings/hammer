@@ -1,13 +1,7 @@
 # 🔨 Hammer
 
-**Features**
-
-- Zero config HTTP server
-- TypeScript support
-- CSS Module support
-- Bundling support
-
-An HTTP server that transparently transforms TypeScript and JavaScript using [esbuild](https://github.com/evanw/esbuild). Because Go is native, this only adds a few milliseconds to the HTTP request. It mirrors the general switches from [http-server](https://github.com/http-party/http-server), and supports multiple sources.
+Develop web apps with React, TypeScript, CSS Modules, without configuring any tooling or compromising speed of development.
+Hammer is written in Go, doesn't require Node.js or NPM, and compiles on-the-fly at native speed.
 
 ## Usage
 
@@ -23,7 +17,7 @@ Options:
   --version                              Show version.
   -p --port=<port>                       The HTTP Server port [default: 4321]
   -a --addr=<host>                       The default IP for the server port [default: 0.0.0.0]
-  -g --gzip                              Compress the output with gzip. Note: Not recommended for local development.
+  -g --gzip                              Compress the output with gzip.
   -P --proxy=<url>                       Redirect 404s to a proxy URL
   --sourcemap=<external|inline|none>     Whether or not to include a source map with the bundle
   --css-modules                          Enable CSS Modules
