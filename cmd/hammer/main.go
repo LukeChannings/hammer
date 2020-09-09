@@ -22,7 +22,7 @@ func main() {
 Usage:
   hammer serve <src>... [-p=<port>] [-a=<host>] [--gzip] [--proxy=<url>] [--css-modules]
   hammer bundle <entrypoint> <dest> [--minify] [--sourcemap=<external|inline|none>] [--extract-css] [--css-modules]
-  hammer trace <entrypoint> [--flat|--list-orphans]
+  hammer dependency-graph <entrypoint> [--flat|--list-orphans]
   hammer -h | --help
   hammer --version
 
@@ -36,7 +36,7 @@ Options:
   --sourcemap=<external|inline|none>     Whether or not to include a source map with the bundle
   --css-modules                          Enable CSS Modules
 
-Trace Options:
+Dependency Graph Options:
   --flat                                 A flat list of all files in the dependency graph
   --list-orphans                         Lists all files that are never imported
 `
@@ -85,7 +85,7 @@ Trace Options:
 
 		serve.Serve(srcs, fmt.Sprintf("%s:%s", addr, port), compress, proxy, cssModules)
 		os.Exit(0)
-	} else if shouldTrace, _ := args.Bool("trace"); shouldTrace {
+	} else if dependencyGraph, _ := args.Bool("dependency-graph"); dependencyGraph {
 		entrypoint, _ := args.String("<entrypoint>")
 		flat, _ := args.Bool("--flat")
 		listOrphans, _ := args.Bool("--list-orphans")

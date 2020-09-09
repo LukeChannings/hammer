@@ -9,7 +9,7 @@ Hammer is written in Go, doesn't require Node.js or NPM, and compiles on-the-fly
 Usage:
   hammer serve <src>... [-p=<port>] [-a=<host>] [--gzip] [--proxy=<url>] [--css-modules]
   hammer bundle <entrypoint> <dest> [--minify] [--sourcemap=<external|inline|none>] [--extract-css] [--css-modules]
-  hammer trace <entrypoint> [--flat|--list-orphans]
+  hammer dependency-graph <entrypoint> [--flat|--list-orphans]
   hammer -h | --help
   hammer --version
 
@@ -23,7 +23,7 @@ Options:
   --sourcemap=<external|inline|none>     Whether or not to include a source map with the bundle
   --css-modules                          Enable CSS Modules
 
-Trace Options:
+Dependency Graph Options:
   --flat                                 A flat list of all files in the dependency graph
   --list-orphans                         Lists all files that are never imported
 ```
