@@ -9,6 +9,7 @@ Hammer is written in Go, doesn't require Node.js or NPM, and compiles on-the-fly
 Usage:
   hammer serve <src>... [-p=<port>] [-a=<host>] [--gzip] [--proxy=<url>] [--css-modules]
   hammer bundle <entrypoint> <dest> [--minify] [--sourcemap=<external|inline|none>] [--extract-css] [--css-modules]
+  hammer trace <entrypoint> [--flat|--list-orphans]
   hammer -h | --help
   hammer --version
 
@@ -17,10 +18,14 @@ Options:
   --version                              Show version.
   -p --port=<port>                       The HTTP Server port [default: 4321]
   -a --addr=<host>                       The default IP for the server port [default: 0.0.0.0]
-  -g --gzip                              Compress the output with gzip.
+  -g --gzip                              Compress the output with gzip. Note: Not recommended for local development.
   -P --proxy=<url>                       Redirect 404s to a proxy URL
   --sourcemap=<external|inline|none>     Whether or not to include a source map with the bundle
   --css-modules                          Enable CSS Modules
+
+Trace Options:
+  --flat                                 A flat list of all files in the dependency graph
+  --list-orphans                         Lists all files that are never imported
 ```
 
 ## Installation

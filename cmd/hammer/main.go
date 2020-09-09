@@ -22,8 +22,8 @@ func main() {
 Usage:
   hammer serve <src>... [-p=<port>] [-a=<host>] [--gzip] [--proxy=<url>] [--css-modules]
   hammer bundle <entrypoint> <dest> [--minify] [--sourcemap=<external|inline|none>] [--extract-css] [--css-modules]
-	hammer trace <entrypoint> [--flat|--list-orphans]
-	hammer -h | --help
+  hammer trace <entrypoint> [--flat|--list-orphans]
+  hammer -h | --help
   hammer --version
 
 Options:
