@@ -10,6 +10,7 @@ import (
 	"github.com/docopt/docopt-go"
 	"github.com/lukechannings/hammer/internal/bundle"
 	"github.com/lukechannings/hammer/internal/serve"
+	"github.com/lukechannings/hammer/internal/trace"
 )
 
 var taggedVersion string
@@ -21,7 +22,8 @@ func main() {
 Usage:
   hammer serve <src>... [-p=<port>] [-a=<host>] [--gzip] [--proxy=<url>] [--css-modules]
   hammer bundle <entrypoint> <dest> [--minify] [--sourcemap=<external|inline|none>] [--extract-css] [--css-modules]
-  hammer -h | --help
+	hammer trace <entrypoint> [--flat|--list-orphans]
+	hammer -h | --help
   hammer --version
 
 Options:
@@ -33,6 +35,10 @@ Options:
   -P --proxy=<url>                       Redirect 404s to a proxy URL
   --sourcemap=<external|inline|none>     Whether or not to include a source map with the bundle
   --css-modules                          Enable CSS Modules
+
+Trace Options:
+  --flat                                 A flat list of all files in the dependency graph
+  --list-orphans                         Lists all files that are never imported
 `
 
 	var version string = gitHash
@@ -79,6 +85,11 @@ Options:
 
 		serve.Serve(srcs, fmt.Sprintf("%s:%s", addr, port), compress, proxy, cssModules)
 		os.Exit(0)
+	} else if shouldTrace, _ := args.Bool("trace"); shouldTrace {
+		entrypoint, _ := args.String("<entrypoint>")
+		flat, _ := args.Bool("--flat")
+		listOrphans, _ := args.Bool("--list-orphans")
+		trace.Trace(entrypoint, flat, listOrphans)
 	} else {
 		fmt.Print(usage)
 		os.Exit(1)

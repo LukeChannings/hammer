@@ -1,3 +1,6 @@
+github.com/bmatcuk/doublestar v1.3.2 h1:mzUncgFmpzNUhIITFqGdZ8nUU0O7JTJzRO8VdkeLCSo=
+github.com/bmatcuk/doublestar/v2 v2.0.1 h1:EFT91DmIMRcrUEcYUW7AqSAwKvNzP5+CoDmNVBbcQOU=
+github.com/bmatcuk/doublestar/v2 v2.0.1/go.mod h1:QMmcs3H2AUQICWhfzLXz+IYln8lRQmTZRptLie8RgRw=
 github.com/docopt/docopt-go v0.0.0-20180111231733-ee0de3bc6815 h1:bWDMxwH3px2JBh6AyO7hdCn/PkvCZXii8TGj7sbtEbQ=
 github.com/docopt/docopt-go v0.0.0-20180111231733-ee0de3bc6815/go.mod h1:WwZ+bS3ebgob9U8Nd0kOddGdZWjyMGR8Wziv+TBNwSE=
 github.com/evanw/esbuild v0.6.26-0.20200817041948-22f622ea2c2d h1:hIgdGaatojhuweRpLXfUJ9VuHP3OU88EAurCVXFb2S0=
