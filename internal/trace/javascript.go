@@ -31,15 +31,15 @@ main:
 					}
 				}
 
-				childNode := Node{parentNode: node}
+				childNode := Node{ParentNode: node}
 				if isURL(from) {
-					childNode.path = from
+					childNode.Path = from
 				} else {
-					childNode.path = path.Join(path.Dir(node.path), from)
+					childNode.Path = path.Join(path.Dir(node.Path), from)
 				}
 
 				childNode.Resolve()
-				node.dependencies = append(node.dependencies, &childNode)
+				node.Dependencies = append(node.Dependencies, &childNode)
 			}
 		}
 	}

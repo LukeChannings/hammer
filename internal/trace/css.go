@@ -22,15 +22,15 @@ main:
 				ts := l.Values()
 				for _, t := range ts {
 					if t.TokenType == css.StringToken {
-						childNode := Node{parentNode: node}
+						childNode := Node{ParentNode: node}
 						importValue := strings.Trim(string(t.Data), "\"")
 						if isURL(importValue) {
-							childNode.path = importValue
+							childNode.Path = importValue
 						} else {
-							childNode.path = path.Join(path.Dir(node.path), importValue)
+							childNode.Path = path.Join(path.Dir(node.Path), importValue)
 						}
 						childNode.Resolve()
-						node.dependencies = append(node.dependencies, &childNode)
+						node.Dependencies = append(node.Dependencies, &childNode)
 					}
 				}
 			}

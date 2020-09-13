@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"log"
 	"os"
-
-	"github.com/evanw/esbuild/pkg/api"
+	"strings"
 
 	"github.com/docopt/docopt-go"
+	"github.com/evanw/esbuild/pkg/api"
 	"github.com/lukechannings/hammer/internal/bundle"
 	"github.com/lukechannings/hammer/internal/serve"
 	"github.com/lukechannings/hammer/internal/trace"
@@ -20,9 +20,9 @@ func main() {
 	usage := `hammer.
 
 Usage:
-  hammer serve <src>... [-p=<port>] [-a=<host>] [--gzip] [--proxy=<url>] [--css-modules]
-  hammer bundle <entrypoint> <dest> [--minify] [--sourcemap=<external|inline|none>] [--extract-css] [--css-modules]
-  hammer dependency-graph <entrypoint> [--flat|--list-orphans]
+  hammer serve <src>... [-p=<port>] [-a=<host>] [--gzip] [--define=<K>=<V>...] [--proxy=<url>] [--css-modules]
+  hammer bundle <src> <dest> [--minify] [--define=<K>=<V>...] [--sourcemap=<external|inline|none>] [--extract-css] [--css-modules]
+  hammer trace <src> [--flat|--orphans] [--json]
   hammer -h | --help
   hammer --version
 
@@ -31,14 +31,17 @@ Options:
   --version                              Show version.
   -p --port=<port>                       The HTTP Server port [default: 4321]
   -a --addr=<host>                       The default IP for the server port [default: 0.0.0.0]
-  -g --gzip                              Compress the output with gzip. Note: Not recommended for local development.
+  -g --gzip                              Compress the output with gzip. Note: Not recommended for local development
   -P --proxy=<url>                       Redirect 404s to a proxy URL
   --sourcemap=<external|inline|none>     Whether or not to include a source map with the bundle
   --css-modules                          Enable CSS Modules
+  --minify                               Minify output
+  --define=<K>=<V>                       Substitute K with V while parsing
 
-Dependency Graph Options:
-  --flat                                 A flat list of all files in the dependency graph
-  --list-orphans                         Lists all files that are never imported
+Trace Options:
+  --flat                                 List all files in the dependency graph
+	--orphans                              Lists all source files in the source path that are never imported in the dependency graph
+  --json                                 Output graph as json
 `
 
 	var version string = gitHash
@@ -52,46 +55,82 @@ Dependency Graph Options:
 		log.Fatal(docoptErr.Error())
 	}
 
+	var command string
+
+	if ok, _ := args.Bool("serve"); ok {
+		command = "serve"
+	}
+	if ok, _ := args.Bool("bundle"); ok {
+		command = "bundle"
+	}
+	if ok, _ := args.Bool("trace"); ok {
+		command = "trace"
+	}
+
+	srcs, _ := args["<src>"].([]string)
+	dest, _ := args.String("<dest>")
 	cssModules, _ := args.Bool("--css-modules")
-
-	if shouldBundle, _ := args.Bool("bundle"); shouldBundle {
-		entrypoint, _ := args.String("<entrypoint>")
-		dest, _ := args.String("<dest>")
-		minify, _ := args.Bool("--minify")
-		extractCSS, _ := args.Bool("--extract-css")
-		smap, _ := args.String("--sourcemap")
-		var sourcemap api.SourceMap
-		if smap == "external" {
-			sourcemap = api.SourceMapExternal
-		} else if smap == "inline" {
-			sourcemap = api.SourceMapInline
-		} else {
-			sourcemap = api.SourceMapNone
+	minify, _ := args.Bool("--minify")
+	extractCSS, _ := args.Bool("--extract-css")
+	var sourceMap api.SourceMap
+	switch flag, _ := args.String("--sourcemap"); flag {
+	case "external":
+		{
+			sourceMap = api.SourceMapExternal
 		}
-		bundle.Bundle(entrypoint, dest, minify, sourcemap, extractCSS, cssModules)
-		os.Exit(0)
-	} else if shouldServe, _ := args.Bool("serve"); shouldServe {
-		srcs, _ := args["<src>"].([]string)
-		addr, _ := args.String("--addr")
-		port, _ := args.String("--port")
-		proxy, _ := args.String("--proxy")
-		zgip, _ := args.Bool("--gzip")
-
-		var compress serve.Compress = serve.CompressNone
-
-		if zgip {
-			compress = serve.CompressGzip
+	case "inline":
+		{
+			sourceMap = api.SourceMapInline
 		}
+	case "linked":
+		{
+			sourceMap = api.SourceMapLinked
+		}
+	default:
+		{
+			sourceMap = api.SourceMapNone
+		}
+	}
+	port, _ := args.String("--port")
+	addr, _ := args.String("--addr")
 
-		serve.Serve(srcs, fmt.Sprintf("%s:%s", addr, port), compress, proxy, cssModules)
-		os.Exit(0)
-	} else if dependencyGraph, _ := args.Bool("dependency-graph"); dependencyGraph {
-		entrypoint, _ := args.String("<entrypoint>")
-		flat, _ := args.Bool("--flat")
-		listOrphans, _ := args.Bool("--list-orphans")
-		trace.Trace(entrypoint, flat, listOrphans)
+	gzip, _ := args.Bool("--gzip")
+	proxy, _ := args.String("--proxy")
+	flat, _ := args.Bool("--flat")
+	orphans, _ := args.Bool("--orphans")
+	outputJSON, _ := args.Bool("--json")
+	define := args["--define"].([]string)
+	var defines map[string]string = make(map[string]string)
+
+	if define != nil && len(define) != 0 {
+		for _, def := range define {
+			pair := strings.Split(def, "=")
+			if len(pair) == 2 {
+				defines[pair[0]] = pair[1]
+			}
+		}
+	}
+
+	var compress serve.Compress
+
+	if gzip {
+		compress = serve.CompressGzip
 	} else {
-		fmt.Print(usage)
-		os.Exit(1)
+		compress = serve.CompressNone
+	}
+
+	switch command {
+	case "serve":
+		{
+			serve.Serve(srcs, fmt.Sprintf("%s:%s", addr, port), compress, proxy, cssModules, defines)
+		}
+	case "bundle":
+		{
+			bundle.Bundle(srcs[0], dest, minify, sourceMap, extractCSS, cssModules, defines)
+		}
+	case "trace":
+		{
+			trace.Trace(srcs[0], flat, orphans, outputJSON)
+		}
 	}
 }

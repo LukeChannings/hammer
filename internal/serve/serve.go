@@ -51,7 +51,7 @@ const (
 )
 
 // Serve - starts an HTTP server to serve static sources and transform TS and JS files on-the-fly.
-func Serve(srcs []string, addr string, compress Compress, proxy string, cssModules bool) {
+func Serve(srcs []string, addr string, compress Compress, proxy string, cssModules bool, defines map[string]string) {
 
 	var handler http.HandlerFunc = func(w http.ResponseWriter, r *http.Request) {
 		p := r.URL.Path
@@ -114,6 +114,7 @@ func Serve(srcs []string, addr string, compress Compress, proxy string, cssModul
 					Sourcemap:  api.SourceMapInline,
 					Loader:     getLoaderForExtension(path.Ext(p)),
 					Sourcefile: p,
+					Defines:    defines,
 				})
 
 				w.Header().Set("content-type", "text/javascript")

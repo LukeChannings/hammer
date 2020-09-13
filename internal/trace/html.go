@@ -26,10 +26,10 @@ main:
 					}
 
 					if string(l.Text()) == "src" {
-						path := path.Join(path.Dir(node.path), strings.Trim(string(l.AttrVal()), "\""))
-						childNode := Node{path: path, parentNode: node}
+						path := path.Join(path.Dir(node.Path), strings.Trim(string(l.AttrVal()), "\""))
+						childNode := Node{Path: path, ParentNode: node}
 						childNode.Resolve()
-						node.dependencies = append(node.dependencies, &childNode)
+						node.Dependencies = append(node.Dependencies, &childNode)
 					}
 				}
 			} else {
