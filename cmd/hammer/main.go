@@ -40,7 +40,7 @@ Options:
 
 Trace Options:
   --flat                                 List all files in the dependency graph
-	--orphans                              Lists all source files in the source path that are never imported in the dependency graph
+  --orphans                              Lists all source files in the source path that are never imported in the dependency graph
   --json                                 Output graph as json
 `
 
