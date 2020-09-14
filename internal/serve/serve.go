@@ -2,18 +2,20 @@ package serve
 
 import (
 	"compress/gzip"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"path"
 	"strings"
-	"time"
 
 	"github.com/lukechannings/hammer/internal/cssmodule"
+	"github.com/lukechannings/hammer/internal/esbuild"
+	"github.com/lukechannings/hammer/internal/livereload"
 
 	"github.com/evanw/esbuild/pkg/api"
-	"github.com/lukechannings/hammer/internal/esbuild"
+	"github.com/logrusorgru/aurora/v3"
 )
 
 var extensions []string = []string{".ts", ".tsx", ".js", ".jsx", ".mjs"}
@@ -24,8 +26,7 @@ func getLoaderForExtension(extension string) api.Loader {
 		return api.LoaderTS
 	case ".tsx":
 		return api.LoaderTSX
-	case ".js":
-	case ".mjs":
+	case ".js", ".mjs":
 		return api.LoaderJS
 	case ".jsx":
 		return api.LoaderJSX
@@ -51,7 +52,12 @@ const (
 )
 
 // Serve - starts an HTTP server to serve static sources and transform TS and JS files on-the-fly.
-func Serve(srcs []string, addr string, compress Compress, proxy string, cssModules bool, defines map[string]string) {
+func Serve(srcs []string, addr string, compress Compress, proxy string, cssModules bool, liveReload bool, defines map[string]string) {
+
+	if liveReload {
+		livereload.InitWatcher()
+		defer livereload.CloseWatcher()
+	}
 
 	var handler http.HandlerFunc = func(w http.ResponseWriter, r *http.Request) {
 		p := r.URL.Path
@@ -61,29 +67,10 @@ func Serve(srcs []string, addr string, compress Compress, proxy string, cssModul
 			p = "/index.html"
 		}
 
-		var fullPath string
-		var content []byte
+		resolvedPath, content, err := loadStaticFile(srcs, p, &extensions)
 
-		for _, src := range srcs {
-			fullPath = path.Join(src, p)
-			data, err := ioutil.ReadFile(fullPath)
-
-			if err == nil {
-				content = data
-				break
-			} else if path.Ext(fullPath) == "" {
-				fmt.Printf("Couldn't find %v. Trying extensions\n", p)
-				for _, ext := range extensions {
-					data, err := ioutil.ReadFile(fullPath + ext)
-					fmt.Printf("Looking for %v\n", fullPath+ext)
-					if err == nil {
-						content = data
-						p += ext
-						break
-					}
-				}
-			}
-		}
+		var body []byte
+		statusCode := http.StatusNotFound
 
 		var zw *gzip.Writer = nil
 
@@ -92,93 +79,133 @@ func Serve(srcs []string, addr string, compress Compress, proxy string, cssModul
 			w.Header().Set("content-encoding", "gzip")
 		}
 
-		if len(content) == 0 {
+		if err == nil {
+			if liveReload {
+				livereload.AddWatcher(*resolvedPath)
+			}
+			statusCode = http.StatusOK
+			body = *content
+			switch path.Ext(*resolvedPath) {
+			case ".ts", ".tsx", ".js", ".jsx", ".mjs":
+				{
+					result := api.Transform(string(*content), api.TransformOptions{
+						Target:     api.ES2018,
+						Sourcemap:  api.SourceMapInline,
+						Loader:     getLoaderForExtension(path.Ext(*resolvedPath)),
+						Sourcefile: *resolvedPath,
+						Defines:    defines,
+					})
+
+					if len(result.Errors) != 0 {
+						statusCode = http.StatusInternalServerError
+						for _, err := range result.Errors {
+							fmt.Printf("%s in %s:%v:%v\n> %s\n", aurora.Red(err.Text), err.Location.File, err.Location.Line, err.Location.Column, aurora.Bold(err.Location.LineText))
+						}
+					} else {
+						if len(result.Warnings) != 0 {
+							for _, warn := range result.Warnings {
+								fmt.Printf("%s in %s:%v:%v\n> %s\n", aurora.Red(warn.Text), warn.Location.File, warn.Location.Line, warn.Location.Column, aurora.Bold(warn.Location.LineText))
+							}
+						}
+						body = result.JS
+					}
+
+					w.Header().Set("content-type", "text/javascript")
+				}
+			case ".css", ".scss":
+				{
+					if hasExtension(ref, extensions...) || path.Ext(ref) == "" {
+						w.Header().Set("content-type", "application/javascript")
+						if cssModules {
+							module, err := cssmodule.Process(strings.NewReader(string(*content)), *resolvedPath)
+							if err != nil {
+								statusCode = http.StatusInternalServerError
+								body = []byte(fmt.Sprintf("500 - %s", err.Error()))
+							}
+							body = []byte(esbuild.WrapCSSForJSInjection(module.CSS, *resolvedPath, module.GetExportsString()))
+						} else {
+							body = []byte(esbuild.WrapCSSForJSInjection(string(*content), *resolvedPath, ""))
+						}
+					} else {
+						w.Header().Set("content-type", "text/css")
+					}
+				}
+			case ".html":
+				{
+					if liveReload {
+						tmp := livereload.Inject(string(*content))
+						content = &tmp
+						body = *content
+					}
+					w.Header().Set("content-type", "text/html")
+				}
+			}
+		} else {
+			fmt.Println(err.Error())
 			if len(proxy) != 0 {
 				location := proxy + r.URL.Path
 				w.Header().Set("Location", location)
 				w.WriteHeader(http.StatusTemporaryRedirect)
-				return
 			}
+		}
 
-			w.WriteHeader(http.StatusNotFound)
-			if zw != nil {
-				zw.Write([]byte(fmt.Sprintf("404 - File not found")))
-				zw.Close()
-			} else {
-				w.Write([]byte(fmt.Sprintf("404 - File not found")))
-			}
+		w.WriteHeader(statusCode)
+
+		if zw != nil {
+			zw.Write(body)
+			zw.Close()
 		} else {
-			if hasExtension(p, extensions...) {
-				result := api.Transform(string(content), api.TransformOptions{
-					Target:     api.ES2018,
-					Sourcemap:  api.SourceMapInline,
-					Loader:     getLoaderForExtension(path.Ext(p)),
-					Sourcefile: p,
-					Defines:    defines,
-				})
-
-				w.Header().Set("content-type", "text/javascript")
-
-				if len(result.Errors) != 0 {
-					for _, err := range result.Errors {
-						fmt.Printf("Error: %s\n", err.Text)
-					}
-				}
-				if len(result.Warnings) != 0 {
-					for _, warn := range result.Warnings {
-						fmt.Printf("Warning: %s\n", warn.Text)
-					}
-				}
-
-				if zw != nil {
-					zw.Write(result.JS)
-					zw.Close()
-				} else {
-					w.Write(result.JS)
-				}
-			} else if strings.HasSuffix(p, ".css") {
-				if hasExtension(ref, extensions...) || path.Ext(ref) == "" {
-					w.Header().Set("content-type", "application/javascript")
-					if cssModules {
-						module, err := cssmodule.Process(strings.NewReader(string(content)), fullPath)
-						if err != nil {
-							w.Write([]byte(fmt.Sprintf("500 - %s", err.Error())))
-						}
-						fmt.Fprint(w, esbuild.WrapCSSForJSInjection(module.CSS, p, module.GetExportsString()))
-					} else {
-						fmt.Fprint(w, esbuild.WrapCSSForJSInjection(string(content), p, ""))
-					}
-				} else {
-					w.Header().Set("content-type", "text/css")
-					if zw != nil {
-						zw.Write(content)
-						zw.Close()
-					} else {
-						w.Write(content)
-					}
-				}
-			} else {
-				if zw != nil {
-					zw.Write(content)
-					zw.Close()
-				} else {
-					w.Write(content)
-				}
-			}
+			w.Write(body)
 		}
 	}
 
-	s := &http.Server{
-		Addr:           addr,
-		Handler:        handler,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
-		MaxHeaderBytes: 1 << 20,
+	mux := http.NewServeMux()
+	if liveReload {
+		mux.HandleFunc(livereload.LiveReloadPath, livereload.Handler)
 	}
 
-	fmt.Println("Listening on ", addr)
+	mux.HandleFunc("/", handler)
 
-	if err := s.ListenAndServe(); err != nil {
+	fmt.Println("Listening on ", "http://"+addr)
+
+	if err := http.ListenAndServe(addr, mux); err != nil {
 		log.Fatalf("An error occurred trying to listen on %v - %v", addr, err.Error())
 	}
+}
+
+// Searches the filesystem for a file based on the srcs and the path.
+// If a duplicate file exists in multiple srcs, the first src will be used.
+// If no file is found an error is returned
+func loadStaticFile(srcs []string, p string, exts *[]string) (resolvedPath *string, content *[]byte, err error) {
+	var searchPath string
+	var found bool
+	for _, src := range srcs {
+		searchPath = path.Join(src, p)
+		data, notFoundErr := ioutil.ReadFile(searchPath)
+
+		if notFoundErr != nil && path.Ext(searchPath) == "" && exts != nil {
+			for _, ext := range *exts {
+				extData, extNotFoundErr := ioutil.ReadFile(searchPath + ext)
+				if extNotFoundErr == nil {
+					searchPath = searchPath + ext
+					data = extData
+					notFoundErr = nil
+					break
+				}
+			}
+		}
+
+		if notFoundErr == nil {
+			resolvedPath = &searchPath
+			content = &data
+			found = true
+			return
+		}
+	}
+
+	if !found {
+		err = errors.New("No file found for " + p)
+	}
+
+	return
 }

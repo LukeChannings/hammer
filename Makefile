@@ -3,6 +3,7 @@ GIT_HASH = $(shell git rev-parse --short HEAD)
 LD_FLAGS = -s -w -X main.gitHash=${GIT_HASH} -X main.taggedVersion=${TAGGED_VERSION}
 
 build: cmd/**/*.go internal/**/*.go
+	pkger -o cmd/hammer
 	mkdir -p build/{darwin,linux,linux-386,windows}
 	GOOS=darwin go build -ldflags="${LD_FLAGS}" -o ./build/darwin/hammer ./cmd/hammer
 	GOOS=linux GOARCH=386 go build -ldflags="${LD_FLAGS}" -o ./build/linux-386/hammer ./cmd/hammer

@@ -10,6 +10,7 @@ import (
 	"github.com/evanw/esbuild/pkg/api"
 	"github.com/lukechannings/hammer/internal/bundle"
 	"github.com/lukechannings/hammer/internal/serve"
+	"github.com/lukechannings/hammer/internal/template"
 	"github.com/lukechannings/hammer/internal/trace"
 )
 
@@ -20,7 +21,8 @@ func main() {
 	usage := `hammer.
 
 Usage:
-  hammer serve <src>... [-p=<port>] [-a=<host>] [--gzip] [--define=<K>=<V>...] [--proxy=<url>] [--css-modules]
+  hammer new <name> [-t=<framework>] [--typescript]
+  hammer serve <src>... [-p=<port>] [-a=<host>] [--gzip] [--define=<K>=<V>...] [--proxy=<url>] [--css-modules] [--live-reload]
   hammer bundle <src> <dest> [--minify] [--define=<K>=<V>...] [--sourcemap=<external|inline|none>] [--extract-css] [--css-modules]
   hammer trace <src> [--flat|--orphans] [--json]
   hammer -h | --help
@@ -31,12 +33,19 @@ Options:
   --version                              Show version.
   -p --port=<port>                       The HTTP Server port [default: 4321]
   -a --addr=<host>                       The default IP for the server port [default: 0.0.0.0]
-  -g --gzip                              Compress the output with gzip. Note: Not recommended for local development
-  -P --proxy=<url>                       Redirect 404s to a proxy URL
   --sourcemap=<external|inline|none>     Whether or not to include a source map with the bundle
   --css-modules                          Enable CSS Modules
   --minify                               Minify output
   --define=<K>=<V>                       Substitute K with V while parsing
+
+New Options:
+  -t --framework=<framework>             A JavaScript framework to use. Options: none, react [default: none]
+  --ts, --typescript                     Use TypeScript
+
+Serve Options:
+  -g --gzip                              Compress the output with gzip. Note: Not recommended for local development
+  -P --proxy=<url>                       Redirect 404s to a proxy URL
+  -w --live-reload                       Watches for changes and sends the changes to the browser
 
 Trace Options:
   --flat                                 List all files in the dependency graph
@@ -57,6 +66,9 @@ Trace Options:
 
 	var command string
 
+	if ok, _ := args.Bool("new"); ok {
+		command = "new"
+	}
 	if ok, _ := args.Bool("serve"); ok {
 		command = "serve"
 	}
@@ -93,12 +105,15 @@ Trace Options:
 	}
 	port, _ := args.String("--port")
 	addr, _ := args.String("--addr")
-
+	name, _ := args.String("<name>")
+	framework, _ := args.String("<framework>")
+	typescript, _ := args.Bool("--typescript")
 	gzip, _ := args.Bool("--gzip")
 	proxy, _ := args.String("--proxy")
 	flat, _ := args.Bool("--flat")
 	orphans, _ := args.Bool("--orphans")
 	outputJSON, _ := args.Bool("--json")
+	liveReload, _ := args.Bool("--live-reload")
 	define := args["--define"].([]string)
 	var defines map[string]string = make(map[string]string)
 
@@ -120,17 +135,13 @@ Trace Options:
 	}
 
 	switch command {
+	case "new":
+		template.New(name, framework, typescript)
 	case "serve":
-		{
-			serve.Serve(srcs, fmt.Sprintf("%s:%s", addr, port), compress, proxy, cssModules, defines)
-		}
+		serve.Serve(srcs, fmt.Sprintf("%s:%s", addr, port), compress, proxy, cssModules, liveReload, defines)
 	case "bundle":
-		{
-			bundle.Bundle(srcs[0], dest, minify, sourceMap, extractCSS, cssModules, defines)
-		}
+		bundle.Bundle(srcs[0], dest, minify, sourceMap, extractCSS, cssModules, defines)
 	case "trace":
-		{
-			trace.Trace(srcs[0], flat, orphans, outputJSON)
-		}
+		trace.Trace(srcs[0], flat, orphans, outputJSON)
 	}
 }
