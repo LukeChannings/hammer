@@ -17,6 +17,8 @@ jobs:
         id: go
       - name: Checkout code
         uses: actions/checkout@v2
+      - name: Install pkger
+        run: go get github.com/markbates/pkger/cmd/pkger
       - name: Build project
         run: make build
       - name: Create Release
