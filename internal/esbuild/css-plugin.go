@@ -20,7 +20,7 @@ func CSSPlugin(extract bool, modules bool) func(api.Plugin) {
 
 		plugin.AddResolver(api.ResolverOptions{Filter: ".css$"},
 			func(args api.ResolverArgs) (api.ResolverResult, error) {
-				return api.ResolverResult{Path: filepath.Join(args.ImportDir, args.Path), Namespace: "css", External: false}, nil
+		return api.ResolverResult{Path: filepath.Join(args.ResolveDir, args.Path), Namespace: "css", External: false}, nil
 			})
 
 		plugin.AddLoader(api.LoaderOptions{Filter: ".css$", Namespace: "css"},

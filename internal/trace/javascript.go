@@ -25,6 +25,9 @@ main:
 					if tt == js.ErrorToken {
 						break main
 					}
+					if string(text) == "type" {
+						break
+					}
 					if tt == js.StringToken {
 						from = strings.Trim(string(text), "\"'")
 						break

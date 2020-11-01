@@ -1,6 +1,6 @@
 import React, { useState } from "https://cdn.skypack.dev/react";
 import { render } from "https://cdn.skypack.dev/react-dom";
-import { test } from "./test.css";
+import { type } from "./test.css";
 
 const App = () => {
 	const [n, setN] = useState<number>(0);

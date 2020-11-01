@@ -47,7 +47,7 @@ func copy(h io.Reader, dest string, convertFromTS bool) {
 		result := api.Transform(string(data), api.TransformOptions{
 			Format: api.FormatESModule,
 		})
-		ioutil.WriteFile(dest, result.JS, 0744)
+	ioutil.WriteFile(dest, result.Code, 0744)
 	} else {
 		ioutil.WriteFile(dest, data, 0744)
 	}

@@ -27,7 +27,7 @@ func Bundle(entrypoint string, dest string, minify bool, sourcemap api.SourceMap
 		MinifyWhitespace:  minify,
 		Sourcemap:         sourcemap,
 		Plugins:           []func(api.Plugin){esbuild.HTTPPlugin(true), esbuild.CSSPlugin(extractCSS, cssModules)},
-		Defines:           defines,
+		Define:           defines,
 	})
 
 	if len(result.Warnings) != 0 {

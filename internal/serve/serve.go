@@ -93,7 +93,7 @@ func Serve(srcs []string, addr string, compress Compress, proxy string, cssModul
 						Sourcemap:  api.SourceMapInline,
 						Loader:     getLoaderForExtension(path.Ext(*resolvedPath)),
 						Sourcefile: *resolvedPath,
-						Defines:    defines,
+						Define:    defines,
 					})
 
 					if len(result.Errors) != 0 {
@@ -107,7 +107,7 @@ func Serve(srcs []string, addr string, compress Compress, proxy string, cssModul
 								fmt.Printf("%s in %s:%v:%v\n> %s\n", aurora.Red(warn.Text), warn.Location.File, warn.Location.Line, warn.Location.Column, aurora.Bold(warn.Location.LineText))
 							}
 						}
-						body = result.JS
+			body = result.Code
 					}
 
 					w.Header().Set("content-type", "text/javascript")

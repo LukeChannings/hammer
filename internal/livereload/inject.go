@@ -30,10 +30,10 @@ func Inject(html string) []byte {
 		MinifyWhitespace:  true,
 		MinifyIdentifiers: true,
 		MinifySyntax:      true,
-		Defines:           map[string]string{"globalThis.__LIVE_RELOAD_PATH__": fmt.Sprintf("'%s'", LiveReloadPath)},
+		Define:           map[string]string{"globalThis.__LIVE_RELOAD_PATH__": fmt.Sprintf("'%s'", LiveReloadPath)},
 	})
 
-	injectedHTML := strings.Replace(html, "</body>", fmt.Sprintf("<script>%s</script></body>", result.JS), 1)
+	injectedHTML := strings.Replace(html, "</body>", fmt.Sprintf("<script>%s</script></body>", result.Code), 1)
 
 	return []byte(injectedHTML)
 }
