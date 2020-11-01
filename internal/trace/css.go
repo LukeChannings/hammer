@@ -5,11 +5,12 @@ import (
 	"path"
 	"strings"
 
-	"github.com/tdewolff/parse/css"
+	"github.com/tdewolff/parse/v2"
+	"github.com/tdewolff/parse/v2/css"
 )
 
 func traceCSSDependencies(r io.Reader, node *Node) {
-	l := css.NewParser(r, false)
+	l := css.NewParser(parse.NewInput(r), false)
 
 main:
 	for {

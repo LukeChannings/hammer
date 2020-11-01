@@ -8,7 +8,8 @@ import (
 	"strings"
 
 	"github.com/lukechannings/hammer/internal/util"
-	"github.com/tdewolff/parse/css"
+	"github.com/tdewolff/parse/v2"
+	"github.com/tdewolff/parse/v2/css"
 )
 
 // Result contains the processed CSS output with its exports
@@ -30,7 +31,7 @@ var indentToken = "  "
 
 // Process converts plain CSS into a CSS Module result
 func Process(r io.Reader, fullPath string) (Result, error) {
-	p := css.NewParser(r, false)
+	p := css.NewParser(parse.NewInput(r), false)
 	var out string
 	var indent int
 

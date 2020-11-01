@@ -5,11 +5,12 @@ import (
 	"path"
 	"strings"
 
-	"github.com/tdewolff/parse/html"
+	"github.com/tdewolff/parse/v2"
+	"github.com/tdewolff/parse/v2/html"
 )
 
 func traceHTMLDependencies(r io.Reader, node *Node) {
-	l := html.NewLexer(r)
+	l := html.NewLexer(parse.NewInput(r))
 
 main:
 	for {

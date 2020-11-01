@@ -5,11 +5,12 @@ import (
 	"path"
 	"strings"
 
-	"github.com/tdewolff/parse/js"
+	"github.com/tdewolff/parse/v2"
+	"github.com/tdewolff/parse/v2/js"
 )
 
 func traceJavaScriptDependencies(r io.Reader, node *Node) {
-	l := js.NewLexer(r)
+	l := js.NewLexer(parse.NewInput(r))
 
 main:
 	for {

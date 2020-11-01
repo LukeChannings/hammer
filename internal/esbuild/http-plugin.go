@@ -9,17 +9,14 @@ import (
 )
 
 // HTTPPlugin - handles external imports in esbuild
-func HTTPPlugin(bundle bool) func(api.Plugin) {
-	return func(plugin api.Plugin) {
-		plugin.SetName("http-plugin")
-
-		plugin.AddResolver(api.ResolverOptions{Filter: "^(https?:)?//"},
-			func(args api.ResolverArgs) (api.ResolverResult, error) {
-				return api.ResolverResult{Path: args.Path, Namespace: "http", External: !bundle}, nil
+func HTTPPlugin(bundle bool) api.Plugin {
+	return api.Plugin{
+		Name: "http-plugin",
+		Setup: func(b api.PluginBuild) {
+			b.OnResolve(api.OnResolveOptions{Namespace: "http", Filter: "^(https?:)?//"}, func(args api.OnResolveArgs) (api.OnResolveResult, error) {
+				return api.OnResolveResult{Path: args.Path, Namespace: "http", External: !bundle}, nil
 			})
-
-		plugin.AddLoader(api.LoaderOptions{Filter: "^https?://", Namespace: "http"},
-			func(args api.LoaderArgs) (api.LoaderResult, error) {
+			b.OnLoad(api.OnLoadOptions{Namespace: "http", Filter: "^(https?:)?//"}, func(args api.OnLoadArgs) (api.OnLoadResult, error) {
 				resp, err := http.Get(args.Path)
 				var content string
 				if err != nil {
@@ -33,7 +30,8 @@ func HTTPPlugin(bundle bool) func(api.Plugin) {
 						content = strings.ReplaceAll(string(body), "from '/", "from 'https://cdn.skypack.dev/")
 					}
 				}
-				return api.LoaderResult{Contents: &content, Loader: api.LoaderNone}, nil
+				return api.OnLoadResult{Contents: &content, Loader: api.LoaderNone}, nil
 			})
+		},
 	}
 }

@@ -14,17 +14,15 @@ import (
 var extracted string
 
 // CSSPlugin - handles CSS imports
-func CSSPlugin(extract bool, modules bool) func(api.Plugin) {
-	return func(plugin api.Plugin) {
-		plugin.SetName("css-plugin")
-
-		plugin.AddResolver(api.ResolverOptions{Filter: ".css$"},
-			func(args api.ResolverArgs) (api.ResolverResult, error) {
-		return api.ResolverResult{Path: filepath.Join(args.ResolveDir, args.Path), Namespace: "css", External: false}, nil
+func CSSPlugin(extract bool, modules bool) api.Plugin {
+	return api.Plugin{
+		Name: "css-plugin",
+		Setup: func(b api.PluginBuild) {
+			b.OnResolve(api.OnResolveOptions{Namespace: "http", Filter: ".css$"}, func(args api.OnResolveArgs) (api.OnResolveResult, error) {
+				return api.OnResolveResult{Path: filepath.Join(args.ResolveDir, args.Path), Namespace: "css", External: false}, nil
 			})
 
-		plugin.AddLoader(api.LoaderOptions{Filter: ".css$", Namespace: "css"},
-			func(args api.LoaderArgs) (api.LoaderResult, error) {
+			b.OnLoad(api.OnLoadOptions{Namespace: "css", Filter: ".css$"}, func(args api.OnLoadArgs) (api.OnLoadResult, error) {
 				data, err := ioutil.ReadFile(args.Path)
 
 				if err != nil {
@@ -36,7 +34,7 @@ func CSSPlugin(extract bool, modules bool) func(api.Plugin) {
 					module, err := cssmodule.Process(strings.NewReader(string(data)), args.Path)
 
 					if err != nil {
-						return api.LoaderResult{}, err
+						return api.OnLoadResult{}, err
 					}
 
 					content = module.GetExportsString()
@@ -54,8 +52,9 @@ func CSSPlugin(extract bool, modules bool) func(api.Plugin) {
 					}
 				}
 
-				return api.LoaderResult{Contents: &content, Loader: api.LoaderNone}, nil
+				return api.OnLoadResult{Contents: &content, Loader: api.LoaderNone}, nil
 			})
+		},
 	}
 }
 
