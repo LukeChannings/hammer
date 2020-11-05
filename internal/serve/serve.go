@@ -93,7 +93,7 @@ func Serve(srcs []string, addr string, compress Compress, proxy string, cssModul
 						Sourcemap:  api.SourceMapInline,
 						Loader:     getLoaderForExtension(path.Ext(*resolvedPath)),
 						Sourcefile: *resolvedPath,
-						Define:    defines,
+						Define:     defines,
 					})
 
 					if len(result.Errors) != 0 {
@@ -107,7 +107,7 @@ func Serve(srcs []string, addr string, compress Compress, proxy string, cssModul
 								fmt.Printf("%s in %s:%v:%v\n> %s\n", aurora.Red(warn.Text), warn.Location.File, warn.Location.Line, warn.Location.Column, aurora.Bold(warn.Location.LineText))
 							}
 						}
-			body = result.Code
+						body = result.Code
 					}
 
 					w.Header().Set("content-type", "text/javascript")
@@ -183,7 +183,7 @@ func loadStaticFile(srcs []string, p string, exts *[]string) (resolvedPath *stri
 		searchPath = path.Join(src, p)
 		data, notFoundErr := ioutil.ReadFile(searchPath)
 
-		if notFoundErr != nil && path.Ext(searchPath) == "" && exts != nil {
+		if notFoundErr != nil && exts != nil {
 			for _, ext := range *exts {
 				extData, extNotFoundErr := ioutil.ReadFile(searchPath + ext)
 				if extNotFoundErr == nil {
