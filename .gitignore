@@ -2,3 +2,4 @@ hammer
 .DS_Store
 build
 pkged.go
+node_modules
